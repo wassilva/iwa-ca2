@@ -14,7 +14,7 @@ mongoose.connect(DATABASE_URL, {
 server.use(express.static("public"))
 server.use(express.json());
 
-server.get('/', async (request, response) => {
+server.get('/vehicle', async (request, response) => {
   const vehicles = await Vehicle.find({});
   return response.json(vehicles);
 });
