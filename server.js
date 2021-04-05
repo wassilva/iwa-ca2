@@ -1,22 +1,22 @@
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-const { DB, PORT } = process.env;
-
+const { DATABASE_URL, PORT } = process.env;
 const server = express();
 
-const port = PORT;
-
-mongoose.connect(DB);
+mongoose.connect(DATABASE_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 server.use(express.static("public"))
-
 server.use(express.json());
 
 server.get('/', (request, response) => {
   return response.send('Hello World');
 });
 
-server.listen(port, () => {
+server.listen(PORT, () => {
   console.log('Server Started!');
 })
