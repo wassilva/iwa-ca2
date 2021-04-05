@@ -19,6 +19,18 @@ server.get('/', async (request, response) => {
   return response.json(vehicles);
 });
 
+server.get('/vehicle/:id', async(request, response) => {
+  const { id } = request.params; 
+
+  const vehicle = await Vehicle.findById(id);
+
+  if(!vehicle) {
+    return response.status(400).json({ error: "Vehicle does not exists" });
+  }
+
+  return response.status(200).json(vehicle);
+});
+
 server.post('/vehicle/store', async (request, response) => {
   const { type, manufacturer, model, vehicle_year, value, quantity } = request.body;
 
@@ -31,7 +43,7 @@ server.post('/vehicle/store', async (request, response) => {
     quantity
   });
 
-  return response.json(vehicle);
+  return response.status(201).json(vehicle);
 });
 
 server.listen(PORT, () => {
