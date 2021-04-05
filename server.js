@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const Vehicle = require('./models/Vehicle');
 
 const { DATABASE_URL, PORT } = process.env;
 const server = express();
@@ -13,8 +14,19 @@ mongoose.connect(DATABASE_URL, {
 server.use(express.static("public"))
 server.use(express.json());
 
-server.get('/', (request, response) => {
-  return response.send('Hello World');
+server.post('/vehicle/store', async (request, response) => {
+  const { type, manufacturer, model, vehicle_year, value, quantity } = request.body;
+
+  const vehicle = await Vehicle.create({
+    type,
+    manufacturer,
+    model,
+    vehicle_year,
+    value,
+    quantity
+  });
+
+  return response.json(vehicle);
 });
 
 server.listen(PORT, () => {
