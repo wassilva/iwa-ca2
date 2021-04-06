@@ -8,7 +8,8 @@ const server = express();
 
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useFindAndModify: false
 });
 
 server.use(express.static("public"))
@@ -52,11 +53,23 @@ server.put('/vehicle/:id/update', async (request, response) => {
 
   const vehicle = await Vehicle.findByIdAndUpdate({ _id: id }, { type, manufacturer, model, vehicle_year, value, quantity }, { new: true });
 
-  if(!vehicle) {
-    return response.status(400).json({ error: "Vehicle does not exits "});
+  if (!vehicle) {
+    return response.status(400).json({ error: "Vehicle does not exits " });
   }
 
   return response.status(200).json(vehicle);
+});
+
+server.delete('/vehicle/:id/delete', async (request, response) => {
+  const { id } = request.params;
+
+  const vehicle = await Vehicle.findByIdAndDelete({ _id: id });
+
+  if (!vehicle) {
+    return response.status(400).json({ message: "Vehicle does not exists" });
+  }
+
+  return response.status(200).json({ message: "Vehicle deleted" });
 });
 
 server.listen(PORT, () => {
