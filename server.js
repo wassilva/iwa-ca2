@@ -19,12 +19,12 @@ server.get('/vehicle', async (request, response) => {
   return response.json(vehicles);
 });
 
-server.get('/vehicle/:id', async(request, response) => {
-  const { id } = request.params; 
+server.get('/vehicle/:id', async (request, response) => {
+  const { id } = request.params;
 
   const vehicle = await Vehicle.findById(id);
 
-  if(!vehicle) {
+  if (!vehicle) {
     return response.status(400).json({ error: "Vehicle does not exists" });
   }
 
@@ -44,6 +44,19 @@ server.post('/vehicle/store', async (request, response) => {
   });
 
   return response.status(201).json(vehicle);
+});
+
+server.put('/vehicle/:id/update', async (request, response) => {
+  const { id } = request.params;
+  const { type, manufacturer, model, vehicle_year, value, quantity } = request.body;
+
+  const vehicle = await Vehicle.findByIdAndUpdate({ _id: id }, { type, manufacturer, model, vehicle_year, value, quantity }, { new: true });
+
+  if(!vehicle) {
+    return response.status(400).json({ error: "Vehicle does not exits "});
+  }
+
+  return response.status(200).json(vehicle);
 });
 
 server.listen(PORT, () => {
