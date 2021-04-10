@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+const { check, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const Vehicle = require('./models/Vehicle');
 
@@ -20,7 +21,19 @@ server.get('/vehicle', async (request, response) => {
   return response.json(vehicles);
 });
 
-server.get('/vehicle/:id', async (request, response) => {
+server.get('/vehicle/:id', [
+  check('id', 'ID format is incorrect')
+    .exists()
+    .isLength({min: 24, max: 24})
+    .isAlphanumeric()
+
+], async (request, response) => {
+  const errors = validationResult(request);
+
+  if(!errors.isEmpty()) {
+    return response.status(422).json(errors.array());
+  }
+
   const { id } = request.params;
 
   const vehicle = await Vehicle.findById(id);
