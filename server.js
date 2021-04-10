@@ -24,13 +24,13 @@ server.get('/vehicle', async (request, response) => {
 server.get('/vehicle/:id', [
   check('id', 'ID format is incorrect')
     .exists()
-    .isLength({min: 24, max: 24})
+    .isLength({ min: 24, max: 24 })
     .isAlphanumeric()
 
 ], async (request, response) => {
   const errors = validationResult(request);
 
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     return response.status(422).json(errors.array());
   }
 
@@ -73,7 +73,18 @@ server.put('/vehicle/:id/update', async (request, response) => {
   return response.status(200).json(vehicle);
 });
 
-server.delete('/vehicle/:id/delete', async (request, response) => {
+server.delete('/vehicle/:id/delete', [
+  check('id', 'ID format is incorrect')
+    .exists()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric()
+], async (request, response) => {
+  const errors = validationResult(request);
+
+  if (!errors.isEmpty()) {
+    return response.status(422).json(errors.array());
+  }
+
   const { id } = request.params;
 
   const vehicle = await Vehicle.findByIdAndDelete({ _id: id });
