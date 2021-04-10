@@ -45,7 +45,33 @@ server.get('/vehicle/:id', [
   return response.status(200).json(vehicle);
 });
 
-server.post('/vehicle/store', async (request, response) => {
+server.post('/vehicle/store', [
+  check('type')
+    .exists().withMessage('The type must be exists')
+    .isString().withMessage('The type must be a string')
+    .isAlpha().withMessage('The type must be character'),
+  check('manufacturer')
+    .exists().withMessage('The manufacturer must be exists')
+    .isString().withMessage('The manufacturer must be a string'),
+  check('model')
+    .exists().withMessage('The model must be exists')
+    .isString().withMessage('The model must be a string'),
+  check('vehicle_year')
+    .exists().withMessage('The vehicle_year must be exists')
+    .isNumeric().withMessage('The vehicle_year must be a number'),
+  check('value')
+    .exists().withMessage('The value must be exists')
+    .isNumeric().withMessage('The value must be a number'),
+  check('quantity')
+    .exists().withMessage('The quantity must be exists')
+    .isNumeric().withMessage('The quantity must be a number')
+], async (request, response) => {
+  const errors = validationResult(request);
+
+  if (!errors.isEmpty()) {
+    return response.status(422).json(errors.array());
+  }
+
   const { type, manufacturer, model, vehicle_year, value, quantity } = request.body;
 
   const vehicle = await Vehicle.create({
@@ -60,7 +86,35 @@ server.post('/vehicle/store', async (request, response) => {
   return response.status(201).json(vehicle);
 });
 
-server.put('/vehicle/:id/update', async (request, response) => {
+server.put('/vehicle/:id/update', [
+  check('id', 'ID format is incorrect')
+    .exists()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric(),
+  check('type')
+    .isString().withMessage('The type must be a string')
+    .isAlpha().withMessage('The type must be character'),
+  check('manufacturer')
+    .exists().withMessage('The manufacturer must be exists')
+    .isString().withMessage('The manufacturer must be a string'),
+  check('model')
+    .exists().withMessage('The model must be exists')
+    .isString().withMessage('The model must be a string'),
+  check('vehicle_year')
+    .exists().withMessage('The vehicle_year must be exists')
+    .isNumeric().withMessage('The vehicle_year must be a number'),
+  check('value')
+    .exists().withMessage('The value must be exists')
+    .isNumeric().withMessage('The value must be a number'),
+  check('quantity')
+    .exists().withMessage('The quantity must be exists')
+    .isNumeric().withMessage('The quantity must be a number')
+], async (request, response) => {
+  const errors = validationResult(request);
+
+  if (!errors.isEmpty()) {
+    return response.status(422).json(errors.array());
+  }
   const { id } = request.params;
   const { type, manufacturer, model, vehicle_year, value, quantity } = request.body;
 
