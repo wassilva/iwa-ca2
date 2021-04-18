@@ -7,7 +7,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>AdminLTE 2 | Starter</title>
+    <title>CA2 | Vehicles</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
@@ -59,7 +59,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
-          <h1>Page Header <small>Vehicles</small></h1>
+          <h1>CA2 <small>Vehicles</small></h1>
         </section>
 
         <!-- Main content -->
@@ -89,7 +89,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                               <th tabindex="0" rowspan="1" colspan="1">Vehicle Year</th>
                               <th tabindex="0" rowspan="1" colspan="1">Value</th>
                               <th tabindex="0" rowspan="1" colspan="1">Quantity</th>
-                              <th tabindex="0" rowspan="1" colspan="1">Action</th>
+                              <th tabindex="0" rowspan="1" colspan="1">Actions</th>
                             </tr>
                           </thead>
                           
@@ -105,7 +105,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                               <th rowspan="1" colspan="1">Vehicle Year</th>
                               <th rowspan="1" colspan="1">Value</th>
                               <th rowspan="1" colspan="1">Quantity</th>
-                              <th rowspan="1" colspan="1">Action</th>
+                              <th rowspan="1" colspan="1">Actions</th>
                             </tr>
                           </tfoot>
                         </table>
@@ -122,6 +122,64 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- /.content-wrapper -->
     </div>
     <!-- ./wrapper -->
+
+    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal" style="display: none;" id="modal_show">
+      Launch Default Modal
+    </button>
+
+    <div class="modal fade in" id="modal" style="padding-right: 17px;">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+            <h4 class="modal-title" id="modal_title">Default Modal</h4>
+          </div>
+          <div class="modal-body">
+            <form role="form" id="vehicle_form">
+              <input type="hidden" id="vehicle_id"/>
+              
+              <div class="form-group">
+                <label for="vehicle_type">Type</label>
+                <input type="text" class="form-control" id="vehicle_type">
+              </div>
+              
+              <div class="form-group">
+                <label for="vehicle_manufacturer">Manufacturer</label>
+                <input type="text" class="form-control" id="vehicle_manufacturer">
+              </div>
+              
+              <div class="form-group">
+                <label for="vehicle_model">Model</label>
+                <input type="text" class="form-control" id="vehicle_model">
+              </div>
+              
+              <div class="form-group">
+                <label for="vehicle_year">Vehicle Year</label>
+                <input type="text" class="form-control" id="vehicle_year">
+              </div>
+              
+              <div class="form-group">
+                <label for="vehicle_value">Value</label>
+                <input type="text" class="form-control" id="vehicle_value">
+              </div>
+              
+              <div class="form-group">
+                <label for="vehicle_quantity">Quantity</label>
+                <input type="text" class="form-control" id="vehicle_quantity">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="modal_save">Save changes</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
   </body>
 
   <!-- REQUIRED JS SCRIPTS -->
@@ -172,7 +230,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         '<td>' + vehicle.model +'</td>' +
                         '<td>' + vehicle.vehicle_year +'</td>' +
                         '<td>' + vehicle.value +'</td>' +
-                        '<td>' + vehicle.quantity +'</td>';
+                        '<td>' + vehicle.quantity +'</td>' +
+                        '<td>' +
+                          '<div class="btn-group">' +
+                          '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\');">' + 
+                              '<i class="fa fa-eye"></i>' + 
+                            '</a>' + 
+                            
+                            '<a href="#" class="btn btn-default btn-xs">' +
+                              '<i class="fa fa-edit"></i>' + 
+                            '</a>' +
+
+                            '<a href="#" class="btn btn-danger btn-xs">' +
+                              '<i class="fa fa-trash"></i>' + 
+                            '</a>' +
+                          '</div>' +
+                        '</td>';
 
                       vehicles.innerHTML += '</tr>';
                     }
@@ -195,6 +268,66 @@ scratch. This page gets rid of all links and provides the needed markup only.
           {
             console.log(error);
             vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
+          },
+          complete: function()
+          {
+            
+          }
+        }
+      );
+    }
+
+    function showVehicle(_vehicle_id)
+    {
+      $.ajax
+      (
+        {
+          url: "/vehicle/" + _vehicle_id,
+          method: 'get',
+          //data: $(this).serialize(),
+          dataType: "json",
+          beforeSend: function()
+          {
+            vehicle_form.reset();
+            
+            vehicle_type.setAttribute('readonly', true);
+            vehicle_manufacturer.setAttribute('readonly', true);
+            vehicle_model.setAttribute('readonly', true);
+            vehicle_year.setAttribute('readonly', true);
+            vehicle_value.setAttribute('readonly', true);
+            vehicle_quantity.setAttribute('readonly', true);
+          },
+          success: function(response)
+          {
+            try
+            {
+              if ('vehicle' in response)
+              {
+                modal_title.innerHTML = 'Show Vehicle';
+                modal_save.style.display = 'none';
+                  
+                vehicle = response.vehicle;
+
+                vehicle_id.value = vehicle._id;
+                
+                vehicle_type.value = vehicle.type;
+                vehicle_manufacturer.value = vehicle.manufacturer;                
+                vehicle_model.value = vehicle.model;                
+                vehicle_year.value = vehicle.vehicle_year;                
+                vehicle_value.value = vehicle.value;                
+                vehicle_quantity.value = vehicle.quantity;
+
+                modal_show.click();
+              }
+            }
+            catch (exe)
+            {
+              console.log(exe.message);
+            }
+          },
+          error: function(error)
+          {
+            console.log(error);
           },
           complete: function()
           {

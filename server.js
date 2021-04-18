@@ -53,7 +53,7 @@ server.get('/vehicle/:id', [
     return response.status(400).json({ error: "Vehicle does not exists" });
   }
 
-  return response.status(200).json(vehicle);
+  return response.status(200).json({'vehicle': vehicle});
 });
 
 server.post('/vehicle/store', [
