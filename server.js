@@ -29,7 +29,7 @@ server.get('/', function(request, response) {
 
 server.get('/vehicle', async (request, response) => {
   const vehicles = await Vehicle.find({});
-  return response.json(vehicles);
+  return response.json({'vehicles': vehicles});
 });
 
 server.get('/vehicle/:id', [
