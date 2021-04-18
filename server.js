@@ -13,8 +13,19 @@ mongoose.connect(DATABASE_URL, {
   useFindAndModify: false
 });
 
-server.use(express.static("public"))
+server.use('/', express.static("public"))
 server.use(express.json());
+
+server.set('views', __dirname + '/views');
+server.engine('html', require('ejs').renderFile);
+
+server.set('view engine', 'ejs');
+
+//-------
+
+server.get('/', function(request, response) {
+  response.render('vehicles.html');
+});
 
 server.get('/vehicle', async (request, response) => {
   const vehicles = await Vehicle.find({});
