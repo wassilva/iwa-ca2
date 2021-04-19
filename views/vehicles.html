@@ -138,42 +138,48 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </div>
           <div class="modal-body">
             <form role="form" id="vehicle_form">
-              <input type="hidden" id="vehicle_id"/>
+              <input type="hidden" name="id" id="vehicle_id"/>
               
               <div class="form-group">
                 <label for="vehicle_type">Type</label>
-                <input type="text" class="form-control" id="vehicle_type">
+                <select class="form-control" name="type" id="vehicle_type" required>
+                  <option value="">Select</option>
+                  <option value="Car">Car</option>
+                  <option value="Motorcycle">Motorcycle</option>
+                </select>
               </div>
               
               <div class="form-group">
                 <label for="vehicle_manufacturer">Manufacturer</label>
-                <input type="text" class="form-control" id="vehicle_manufacturer">
+                <input type="text" class="form-control" name="manufacturer" id="vehicle_manufacturer" required/>
               </div>
               
               <div class="form-group">
                 <label for="vehicle_model">Model</label>
-                <input type="text" class="form-control" id="vehicle_model">
+                <input type="text" class="form-control" name="model" id="vehicle_model" required/>
               </div>
               
               <div class="form-group">
                 <label for="vehicle_year">Vehicle Year</label>
-                <input type="text" class="form-control" id="vehicle_year">
+              <input type="text" class="form-control" name="vehicle_year" id="vehicle_year" required/>
               </div>
               
               <div class="form-group">
                 <label for="vehicle_value">Value</label>
-                <input type="text" class="form-control" id="vehicle_value">
+                <input type="text" class="form-control" name="value" id="vehicle_value" required/>
               </div>
               
               <div class="form-group">
                 <label for="vehicle_quantity">Quantity</label>
-                <input type="text" class="form-control" id="vehicle_quantity">
+                <input type="text" class="form-control" name="quantity" id="vehicle_quantity" required/>
               </div>
+
+              <input type="submit" id="vehicle_form_submit" style="display: none;"/>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="modal_save">Save changes</button>
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="modal_close">Close</button>
+            <button type="button" class="btn btn-primary" id="modal_save" onclick="vehicle_form_submit.click();">Save changes</button>
           </div>
         </div>
         <!-- /.modal-content -->
@@ -191,11 +197,33 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- AdminLTE App -->
   <script src="dist/js/adminlte.min.js"></script>
 
-  <!-- Optionally, you can add Slimscroll and FastClick plugins.
-      Both of these plugins are recommended to enhance the
-      user experience. -->
+  <script src="bower_components/inputmask/dist/inputmask/inputmask.js"></script>
+  <script src="bower_components/inputmask/dist/inputmask/jquery.inputmask.js"></script>
+
   <script>
     window.onload = function()
+    {
+      $('#vehicle_manufacturer').inputmask({regex: '[a-zA-Z0-9 ]+'});
+      $('#vehicle_model').inputmask({regex: '[a-zA-Z0-9 ]+'});
+      $('#vehicle_year').inputmask({regex: '[0-9]{4}'});
+      $('#vehicle_value').inputmask({regex: '[0-9]{1,9}([.][0-9][0-9]?)?'});
+      $('#vehicle_quantity').inputmask({regex: '[0-9]{1,9}'});
+
+      showVehicles();
+    }
+
+    vehicle_form.onsubmit = function()
+    {
+      switch (this.route)
+      {
+        case 'update': updateVehicle(); break;
+        case 'store': storeVehicle(); break;
+      }
+
+      return false;
+    }
+
+    function showVehicles()
     {
       $.ajax
       (
@@ -203,7 +231,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
           url: "/vehicle",
           method: 'get',
           //data: $(this).serialize(),
-          dataType: "json",
+          //dataType: "json",
+          contentType: "application/json; charset=utf-8",
           beforeSend: function()
           {
             vehicles.innerHTML = '';
@@ -233,12 +262,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         '<td>' + vehicle.quantity +'</td>' +
                         '<td>' +
                           '<div class="btn-group">' +
-                          '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\');">' + 
+                          '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\', true);">' + 
                               '<i class="fa fa-eye"></i>' + 
                             '</a>' + 
                             
                             '<a href="#" class="btn btn-default btn-xs">' +
-                              '<i class="fa fa-edit"></i>' + 
+                              '<i class="fa fa-edit" onclick="showVehicle(\'' + vehicle._id + '\', false);"></i>' + 
                             '</a>' +
 
                             '<a href="#" class="btn btn-danger btn-xs">' +
@@ -277,7 +306,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       );
     }
 
-    function showVehicle(_vehicle_id)
+    function showVehicle(_vehicle_id, _readonly = true)
     {
       $.ajax
       (
@@ -285,17 +314,32 @@ scratch. This page gets rid of all links and provides the needed markup only.
           url: "/vehicle/" + _vehicle_id,
           method: 'get',
           //data: $(this).serialize(),
-          dataType: "json",
+          //dataType: "json",
+          contentType: "application/json; charset=utf-8",
           beforeSend: function()
           {
             vehicle_form.reset();
             
-            vehicle_type.setAttribute('readonly', true);
-            vehicle_manufacturer.setAttribute('readonly', true);
-            vehicle_model.setAttribute('readonly', true);
-            vehicle_year.setAttribute('readonly', true);
-            vehicle_value.setAttribute('readonly', true);
-            vehicle_quantity.setAttribute('readonly', true);
+            if (_readonly)
+            {
+              vehicle_type.setAttribute('readonly', true);
+              vehicle_manufacturer.setAttribute('readonly', true);
+              vehicle_model.setAttribute('readonly', true);
+              vehicle_year.setAttribute('readonly', true);
+              vehicle_value.setAttribute('readonly', true);
+              vehicle_quantity.setAttribute('readonly', true);
+            }
+            else
+            {
+              vehicle_form.route = 'update';
+
+              vehicle_type.removeAttribute('readonly');
+              vehicle_manufacturer.removeAttribute('readonly');
+              vehicle_model.removeAttribute('readonly');
+              vehicle_year.removeAttribute('readonly');
+              vehicle_value.removeAttribute('readonly');
+              vehicle_quantity.removeAttribute('readonly');
+            }
           },
           success: function(response)
           {
@@ -303,8 +347,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
             {
               if ('vehicle' in response)
               {
-                modal_title.innerHTML = 'Show Vehicle';
-                modal_save.style.display = 'none';
+                if (_readonly)
+                {
+                  modal_title.innerHTML = 'Show Vehicle';
+                  modal_save.style.display = 'none';
+                }
+                else
+                {
+                  modal_title.innerHTML = 'Edit Vehicle';
+                  modal_save.style.display = 'inline-block';
+                }
                   
                 vehicle = response.vehicle;
 
@@ -332,6 +384,69 @@ scratch. This page gets rid of all links and provides the needed markup only.
           complete: function()
           {
             
+          }
+        }
+      );
+    }
+
+    function updateVehicle()
+    {
+      $.ajax
+      (
+        {
+          url: "/vehicle/" + vehicle_id.value,
+          method: 'put',
+          data: JSON.stringify
+          (
+            {
+              type: vehicle_type.value, 
+              manufacturer: vehicle_manufacturer.value, 
+              model: vehicle_model.value,
+              vehicle_year: vehicle_year.value,
+              value: vehicle_value.value, 
+              quantity: vehicle_quantity.value
+            }
+          ),
+          //dataType: "json",
+          contentType: "application/json; charset=utf-8",
+          beforeSend: function()
+          {
+            modal_save.disabled = true;
+          },
+          success: function(response)
+          {
+            try
+            {
+              if ('vehicle' in response)
+              {
+                vehicle = response.vehicle;
+
+                vehicle_id.value = vehicle._id;
+                
+                vehicle_type.value = vehicle.type;
+                vehicle_manufacturer.value = vehicle.manufacturer;                
+                vehicle_model.value = vehicle.model;                
+                vehicle_year.value = vehicle.vehicle_year;                
+                vehicle_value.value = vehicle.value;                
+                vehicle_quantity.value = vehicle.quantity;
+
+                alert('Vehicle successfully changed!');
+
+                showVehicles();
+              }
+            }
+            catch (exe)
+            {
+              console.log(exe.message);
+            }
+          },
+          error: function(error)
+          {
+            console.log(error);
+          },
+          complete: function()
+          {
+            modal_save.disabled = false;
           }
         }
       );

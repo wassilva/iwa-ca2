@@ -97,12 +97,13 @@ server.post('/vehicle/store', [
   return response.status(201).json(vehicle);
 });
 
-server.put('/vehicle/:id/update', [
+server.put('/vehicle/:id', [
   check('id', 'ID format is incorrect')
     .exists()
     .isLength({ min: 24, max: 24 })
     .isAlphanumeric(),
   check('type')
+    .exists().withMessage('The vehicle_year must be exists')
     .isString().withMessage('The type must be a string')
     .isAlpha().withMessage('The type must be character'),
   check('manufacturer')
@@ -135,10 +136,10 @@ server.put('/vehicle/:id/update', [
     return response.status(400).json({ error: "Vehicle does not exits " });
   }
 
-  return response.status(200).json(vehicle);
+  return response.status(200).json({'vehicle': vehicle});
 });
 
-server.delete('/vehicle/:id/delete', [
+server.delete('/vehicle/:id', [
   check('id', 'ID format is incorrect')
     .exists()
     .isLength({ min: 24, max: 24 })
