@@ -53,7 +53,7 @@ server.get('/vehicle/:id', [
     return response.status(400).json({ error: "Vehicle does not exists" });
   }
 
-  return response.status(200).json({'vehicle': vehicle});
+  return response.status(200).json({vehicle: vehicle});
 });
 
 server.post('/vehicle', [
@@ -94,7 +94,7 @@ server.post('/vehicle', [
     quantity
   });
 
-  return response.status(201).json(vehicle);
+  return response.status(201).json({vehicle: vehicle});
 });
 
 server.put('/vehicle/:id', [
@@ -136,7 +136,7 @@ server.put('/vehicle/:id', [
     return response.status(400).json({ error: "Vehicle does not exits " });
   }
 
-  return response.status(200).json({'vehicle': vehicle});
+  return response.status(200).json({vehicle: vehicle});
 });
 
 server.delete('/vehicle/:id', [

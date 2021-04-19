@@ -69,6 +69,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <div class="box">
                 <div class="box-header">
                   <h3 class="box-title">Vehicles (<span id="vehicles_count">?</span>)</h3>
+                  <a href="#" class="btn btn-success btn-s" style="float: right;" onclick="createVehicle();">
+                    <i class="fa fa-plus"></i>
+                  </a>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
@@ -179,7 +182,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="modal_close">Close</button>
-            <button type="button" class="btn btn-primary" id="modal_save" onclick="vehicle_form_submit.click();">Save changes</button>
+            <button type="button" class="btn btn-success" id="modal_save" onclick="vehicle_form_submit.click();">Save changes</button>
           </div>
         </div>
         <!-- /.modal-content -->
@@ -201,8 +204,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="bower_components/inputmask/dist/inputmask/jquery.inputmask.js"></script>
 
   <script>
-    window.onload = function()
-    {
+    window.onload = function() {
       $('#vehicle_manufacturer').inputmask({regex: '[a-zA-Z0-9 ]+'});
       $('#vehicle_model').inputmask({regex: '[a-zA-Z0-9 ]+'});
       $('#vehicle_year').inputmask({regex: '[0-9]{4}'});
@@ -212,277 +214,291 @@ scratch. This page gets rid of all links and provides the needed markup only.
       showVehicles();
     }
 
-    vehicle_form.onsubmit = function()
-    {
-      switch (this.route)
-      {
+    vehicle_form.onsubmit = function() {
+      switch (this.route) {
         case 'update': updateVehicle(); break;
-        case 'store': storeVehicle(); break;
+        case 'add': addVehicle(); break;
       }
 
       return false;
     }
 
-    function showVehicles()
-    {
-      $.ajax
-      (
-        {
-          url: "/vehicle",
-          method: 'get',
-          //data: $(this).serialize(),
-          //dataType: "json",
-          contentType: "application/json; charset=utf-8",
-          beforeSend: function()
-          {
-            vehicles.innerHTML = '';
-          },
-          success: function(response)
-          {
-            try
-            {
-              if ('vehicles' in response)
-              {
-                if (response.vehicles.length > 0)
-                {
-                  vehicles_count.innerHTML = response.vehicles.length;
-                  
-                  response.vehicles.forEach
-                  (
-                    vehicle => 
-                    {
-                      vehicles.innerHTML += '<tr>';
-
-                      vehicles.innerHTML += 
-                        '<td>' + vehicle.type +'</td>' +
-                        '<td>' + vehicle.manufacturer +'</td>' +
-                        '<td>' + vehicle.model +'</td>' +
-                        '<td>' + vehicle.vehicle_year +'</td>' +
-                        '<td>' + vehicle.value +'</td>' +
-                        '<td>' + vehicle.quantity +'</td>' +
-                        '<td>' +
-                          '<div class="btn-group">' +
-                          '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\', true);">' + 
-                              '<i class="fa fa-eye"></i>' + 
-                            '</a>' + 
-                            
-                            '<a href="#" class="btn btn-default btn-xs">' +
-                              '<i class="fa fa-edit" onclick="showVehicle(\'' + vehicle._id + '\', false);"></i>' + 
-                            '</a>' +
-
-                            '<a href="#" class="btn btn-danger btn-xs">' +
-                              '<i class="fa fa-trash" onclick="if (confirm(\'Are you sure you want to delete this vehicle?\')) {deleteVehicle(\'' + vehicle._id + '\');}"></i>' + 
-                            '</a>' +
-                          '</div>' +
-                        '</td>';
-
-                      vehicles.innerHTML += '</tr>';
-                    }
-                  );
-                }
-                else
-                {
-                  vehicles_count.innerHTML = response.vehicles.length;
-                  vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
-                }
-              }
-            }
-            catch (exe)
-            {
-              console.log(exe.message);
-              vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
-            }
-          },
-          error: function(error)
-          {
-            console.log(error);
-            vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
-          },
-          complete: function() {}
-        }
-      );
-    }
-
-    function showVehicle(_vehicle_id, _readonly = true)
-    {
-      $.ajax
-      (
-        {
-          url: "/vehicle/" + _vehicle_id,
-          method: 'get',
-          //data: $(this).serialize(),
-          //dataType: "json",
-          contentType: "application/json; charset=utf-8",
-          beforeSend: function()
-          {
-            vehicle_form.reset();
-            
-            if (_readonly)
-            {
-              vehicle_type.setAttribute('disabled', true);
-              vehicle_manufacturer.setAttribute('readonly', true);
-              vehicle_model.setAttribute('readonly', true);
-              vehicle_year.setAttribute('readonly', true);
-              vehicle_value.setAttribute('readonly', true);
-              vehicle_quantity.setAttribute('readonly', true);
-            }
-            else
-            {
-              vehicle_form.route = 'update';
-
-              vehicle_type.removeAttribute('disabled');
-              vehicle_manufacturer.removeAttribute('readonly');
-              vehicle_model.removeAttribute('readonly');
-              vehicle_year.removeAttribute('readonly');
-              vehicle_value.removeAttribute('readonly');
-              vehicle_quantity.removeAttribute('readonly');
-            }
-          },
-          success: function(response)
-          {
-            try
-            {
-              if ('vehicle' in response)
-              {
-                if (_readonly)
-                {
-                  modal_title.innerHTML = 'Show Vehicle';
-                  modal_save.style.display = 'none';
-                }
-                else
-                {
-                  modal_title.innerHTML = 'Edit Vehicle';
-                  modal_save.style.display = 'inline-block';
-                }
-                  
-                vehicle = response.vehicle;
-
-                vehicle_id.value = vehicle._id;
+    function showVehicles() {
+      $.ajax({
+        url: "/vehicle",
+        method: 'get',
+        //data: $(this).serialize(),
+        //dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+          vehicles.innerHTML = '';
+        },
+        success: function(response) {
+          try  {
+            if ('vehicles' in response) {
+              if (response.vehicles.length > 0) {
+                vehicles_count.innerHTML = response.vehicles.length;
                 
-                vehicle_type.value = vehicle.type;
-                vehicle_manufacturer.value = vehicle.manufacturer;                
-                vehicle_model.value = vehicle.model;                
-                vehicle_year.value = vehicle.vehicle_year;                
-                vehicle_value.value = vehicle.value;                
-                vehicle_quantity.value = vehicle.quantity;
+                response.vehicles.forEach(vehicle => {
+                    vehicles.innerHTML += '<tr>';
 
-                modal_show.click();
+                    vehicles.innerHTML += 
+                      '<td>' + vehicle.type +'</td>' +
+                      '<td>' + vehicle.manufacturer +'</td>' +
+                      '<td>' + vehicle.model +'</td>' +
+                      '<td>' + vehicle.vehicle_year +'</td>' +
+                      '<td>' + vehicle.value +'</td>' +
+                      '<td>' + vehicle.quantity +'</td>' +
+                      '<td>' +
+                        '<div class="btn-group">' +
+                        '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\', true);">' + 
+                            '<i class="fa fa-eye"></i>' + 
+                          '</a>' + 
+                          
+                          '<a href="#" class="btn btn-default btn-xs" onclick="showVehicle(\'' + vehicle._id + '\', false);">' +
+                            '<i class="fa fa-edit"></i>' + 
+                          '</a>' +
+
+                          '<a href="#" class="btn btn-danger btn-xs" onclick="if (confirm(\'Are you sure you want to delete this vehicle?\')) {deleteVehicle(\'' + vehicle._id + '\');}">' +
+                            '<i class="fa fa-trash"></i>' + 
+                          '</a>' +
+                        '</div>' +
+                      '</td>';
+
+                    vehicles.innerHTML += '</tr>';
+                });
+              }
+              else {
+                vehicles_count.innerHTML = response.vehicles.length;
+                vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
               }
             }
-            catch (exe)
-            {
-              console.log(exe.message);
-            }
-          },
-          error: function(error)
-          {
-            console.log(error);
-          },
-          complete: function() {}
-        }
-      );
-    }
-
-    function updateVehicle()
-    {
-      $.ajax
-      (
-        {
-          url: "/vehicle/" + vehicle_id.value,
-          method: 'put',
-          data: JSON.stringify
-          (
-            {
-              type: vehicle_type.value, 
-              manufacturer: vehicle_manufacturer.value, 
-              model: vehicle_model.value,
-              vehicle_year: vehicle_year.value,
-              value: vehicle_value.value, 
-              quantity: vehicle_quantity.value
-            }
-          ),
-          //dataType: "json",
-          contentType: "application/json; charset=utf-8",
-          beforeSend: function()
-          {
-            modal_save.disabled = true;
-          },
-          success: function(response)
-          {
-            try
-            {
-              if ('vehicle' in response)
-              {
-                vehicle = response.vehicle;
-
-                vehicle_id.value = vehicle._id;
-                
-                vehicle_type.value = vehicle.type;
-                vehicle_manufacturer.value = vehicle.manufacturer;                
-                vehicle_model.value = vehicle.model;                
-                vehicle_year.value = vehicle.vehicle_year;                
-                vehicle_value.value = vehicle.value;                
-                vehicle_quantity.value = vehicle.quantity;
-
-                alert('Vehicle successfully changed!');
-
-                showVehicles();
-              }
-            }
-            catch (exe)
-            {
-              console.log(exe.message);
-            }
-          },
-          error: function(error)
-          {
-            console.log(error);
-          },
-          complete: function()
-          {
-            modal_save.disabled = false;
           }
-        }
-      );
+          catch (exe) {
+            console.log(exe.message);
+            vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
+          }
+        },
+        error: function(error) {
+          console.log(error);
+          vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
+        },
+        complete: function() {}
+      });
     }
 
-    function deleteVehicle(_vehicle_id)
-    {
-      $.ajax
-      (
-        {
-          url: "/vehicle/" + _vehicle_id,
-          method: 'delete',
-          //data: JSON.stringify(),
-          //dataType: "json",
-          contentType: "application/json; charset=utf-8",
-          beforeSend: function() {},
-          success: function(response)
-          {
-            try
-            {
-              if ('success' in response && response.success)
-              {
-                showVehicles();
-              }
+    function showVehicle(_vehicle_id, _readonly = true) {
+      $.ajax({
+        url: "/vehicle/" + _vehicle_id,
+        method: 'get',
+        //data: $(this).serialize(),
+        //dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+          vehicle_form.reset();
+          
+          if (_readonly) {
+            vehicle_type.setAttribute('disabled', true);
+            vehicle_manufacturer.setAttribute('readonly', true);
+            vehicle_model.setAttribute('readonly', true);
+            vehicle_year.setAttribute('readonly', true);
+            vehicle_value.setAttribute('readonly', true);
+            vehicle_quantity.setAttribute('readonly', true);
+          }
+          else {
+            vehicle_form.route = 'update';
 
-              if ('message' in response)
-              {
-                alert(response.message);
+            vehicle_type.removeAttribute('disabled');
+            vehicle_manufacturer.removeAttribute('readonly');
+            vehicle_model.removeAttribute('readonly');
+            vehicle_year.removeAttribute('readonly');
+            vehicle_value.removeAttribute('readonly');
+            vehicle_quantity.removeAttribute('readonly');
+          }
+        },
+        success: function(response) {
+          try {
+            if ('vehicle' in response) {
+              if (_readonly) {
+                modal_title.innerHTML = 'Show Vehicle';
+                modal_save.style.display = 'none';
               }
+              else {
+                modal_title.innerHTML = 'Edit Vehicle';
+                modal_save.style.display = 'inline-block';
+              }
+                
+              vehicle = response.vehicle;
+
+              vehicle_id.value = vehicle._id;
+              
+              vehicle_type.value = vehicle.type;
+              vehicle_manufacturer.value = vehicle.manufacturer;                
+              vehicle_model.value = vehicle.model;                
+              vehicle_year.value = vehicle.vehicle_year;                
+              vehicle_value.value = vehicle.value;                
+              vehicle_quantity.value = vehicle.quantity;
+
+              modal_show.click();
             }
-            catch (exe)
-            {
-              console.log(exe.message);
+          }
+          catch (exe) {
+            console.log(exe.message);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        complete: function() {}
+      });
+    }
+
+    function updateVehicle() {
+      $.ajax({
+        url: "/vehicle/" + vehicle_id.value,
+        method: 'put',
+        data: JSON.stringify({
+          type: vehicle_type.value, 
+          manufacturer: vehicle_manufacturer.value, 
+          model: vehicle_model.value,
+          vehicle_year: vehicle_year.value,
+          value: vehicle_value.value, 
+          quantity: vehicle_quantity.value
+        }),
+        //dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+          modal_save.disabled = true;
+        },
+        success: function(response) {
+          try {
+            if ('vehicle' in response) {
+              vehicle = response.vehicle;
+
+              vehicle_id.value = vehicle._id;
+              
+              vehicle_type.value = vehicle.type;
+              vehicle_manufacturer.value = vehicle.manufacturer;                
+              vehicle_model.value = vehicle.model;                
+              vehicle_year.value = vehicle.vehicle_year;                
+              vehicle_value.value = vehicle.value;                
+              vehicle_quantity.value = vehicle.quantity;
+
+              showVehicles();
+
+              alert('Vehicle successfully changed!');
+
+              modal_close.click();
             }
-          },
-          error: function(error)
-          {
-            console.log(error);
-          },
-          complete: function() {}
+          }
+          catch (exe) {
+            console.log(exe.message);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        complete: function() {
+          modal_save.disabled = false;
         }
-      );
+      });
+    }
+
+    function deleteVehicle(_vehicle_id) {
+      $.ajax({
+        url: "/vehicle/" + _vehicle_id,
+        method: 'delete',
+        //data: JSON.stringify(),
+        //dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {},
+        success: function(response) {
+          try {
+            if ('success' in response && response.success) {
+              showVehicles();
+            }
+
+            if ('message' in response) {
+              alert(response.message);
+            }
+          }
+          catch (exe) {
+            console.log(exe.message);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        complete: function() {}
+      });
+    }
+
+    function addVehicle() {
+      $.ajax({
+        url: "/vehicle/",
+        method: 'post',
+        data: JSON.stringify({
+          type: vehicle_type.value, 
+          manufacturer: vehicle_manufacturer.value, 
+          model: vehicle_model.value,
+          vehicle_year: vehicle_year.value,
+          value: vehicle_value.value, 
+          quantity: vehicle_quantity.value
+        }),
+        //dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+          modal_save.disabled = true;
+        },
+        success: function(response) {
+          try {
+            if ('vehicle' in response) {
+              vehicle = response.vehicle;
+
+              vehicle_id.value = vehicle._id;
+              
+              vehicle_type.value = vehicle.type;
+              vehicle_manufacturer.value = vehicle.manufacturer;                
+              vehicle_model.value = vehicle.model;                
+              vehicle_year.value = vehicle.vehicle_year;                
+              vehicle_value.value = vehicle.value;                
+              vehicle_quantity.value = vehicle.quantity;
+
+              showVehicles();
+              
+              alert('Vehicle successfully added!');
+
+              modal_close.click();
+            }
+          }
+          catch (exe) {
+            console.log(exe.message);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        complete: function() {
+          modal_save.disabled = false;
+        }
+      });
+    }
+
+    function createVehicle() {
+      vehicle_form.route = 'add';
+      vehicle_form.reset();
+
+      vehicle_type.removeAttribute('disabled');
+      vehicle_manufacturer.removeAttribute('readonly');
+      vehicle_model.removeAttribute('readonly');
+      vehicle_year.removeAttribute('readonly');
+      vehicle_value.removeAttribute('readonly');
+      vehicle_quantity.removeAttribute('readonly');
+
+      modal_title.innerHTML = 'Add Vehicle';
+      modal_save.style.display = 'inline-block';
+
+      modal_show.click();
     }
   </script>
 </html>
