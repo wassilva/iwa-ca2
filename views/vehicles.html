@@ -271,7 +271,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             '</a>' +
 
                             '<a href="#" class="btn btn-danger btn-xs">' +
-                              '<i class="fa fa-trash"></i>' + 
+                              '<i class="fa fa-trash" onclick="if (confirm(\'Are you sure you want to delete this vehicle?\')) {deleteVehicle(\'' + vehicle._id + '\');}"></i>' + 
                             '</a>' +
                           '</div>' +
                         '</td>';
@@ -298,10 +298,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             console.log(error);
             vehicles.innerHTML = '<tr><td colspan="6" style="text-align: center;">Not Found</td></tr>';
           },
-          complete: function()
-          {
-            
-          }
+          complete: function() {}
         }
       );
     }
@@ -322,7 +319,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             
             if (_readonly)
             {
-              vehicle_type.setAttribute('readonly', true);
+              vehicle_type.setAttribute('disabled', true);
               vehicle_manufacturer.setAttribute('readonly', true);
               vehicle_model.setAttribute('readonly', true);
               vehicle_year.setAttribute('readonly', true);
@@ -333,7 +330,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             {
               vehicle_form.route = 'update';
 
-              vehicle_type.removeAttribute('readonly');
+              vehicle_type.removeAttribute('disabled');
               vehicle_manufacturer.removeAttribute('readonly');
               vehicle_model.removeAttribute('readonly');
               vehicle_year.removeAttribute('readonly');
@@ -381,10 +378,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           {
             console.log(error);
           },
-          complete: function()
-          {
-            
-          }
+          complete: function() {}
         }
       );
     }
@@ -448,6 +442,45 @@ scratch. This page gets rid of all links and provides the needed markup only.
           {
             modal_save.disabled = false;
           }
+        }
+      );
+    }
+
+    function deleteVehicle(_vehicle_id)
+    {
+      $.ajax
+      (
+        {
+          url: "/vehicle/" + _vehicle_id,
+          method: 'delete',
+          //data: JSON.stringify(),
+          //dataType: "json",
+          contentType: "application/json; charset=utf-8",
+          beforeSend: function() {},
+          success: function(response)
+          {
+            try
+            {
+              if ('success' in response && response.success)
+              {
+                showVehicles();
+              }
+
+              if ('message' in response)
+              {
+                alert(response.message);
+              }
+            }
+            catch (exe)
+            {
+              console.log(exe.message);
+            }
+          },
+          error: function(error)
+          {
+            console.log(error);
+          },
+          complete: function() {}
         }
       );
     }

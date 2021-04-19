@@ -56,7 +56,7 @@ server.get('/vehicle/:id', [
   return response.status(200).json({'vehicle': vehicle});
 });
 
-server.post('/vehicle/store', [
+server.post('/vehicle', [
   check('type')
     .exists().withMessage('The type must be exists')
     .isString().withMessage('The type must be a string')
@@ -156,10 +156,10 @@ server.delete('/vehicle/:id', [
   const vehicle = await Vehicle.findByIdAndDelete({ _id: id });
 
   if (!vehicle) {
-    return response.status(400).json({ message: "Vehicle does not exists" });
+    return response.status(400).json({ success: false, message: "Vehicle does not exists!" });
   }
 
-  return response.status(200).json({ message: "Vehicle deleted" });
+  return response.status(200).json({ success: true, message: "Vehicle successfully deleted!" });
 });
 
 server.listen(PORT, () => {
