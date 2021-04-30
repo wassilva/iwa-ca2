@@ -1,5 +1,10 @@
 const { Schema, model } = require('mongoose');
 
+// code responsible for mapping the record that comes from the requests
+// and that shows the object structure that comes from the database
+
+// creation of: type, manufacturer, model, vehicle year, value, quantity
+
 const VehicleSchema = new Schema({
   type: {
     type: String,
